@@ -185,6 +185,8 @@ public class BungeeCord extends ProxyServer
         return (BungeeCord) ProxyServer.getInstance();
     }
 
+    public static String prefix = "§cBUNGEE §8» §r";
+
     @SuppressFBWarnings("DM_DEFAULT_ENCODING")
     public BungeeCord() throws IOException
     {
@@ -192,15 +194,6 @@ public class BungeeCord extends ProxyServer
         Preconditions.checkState( new File( "." ).getAbsolutePath().indexOf( '!' ) == -1, "Cannot use BungeeCord in directory with ! in path." );
 
         reloadMessages();
-
-        // This is a workaround for quite possibly the weirdest bug I have ever encountered in my life!
-        // When jansi attempts to extract its natives, by default it tries to extract a specific version,
-        // using the loading class's implementation version. Normally this works completely fine,
-        // however when on Windows certain characters such as - and : can trigger special behaviour.
-        // Furthermore this behaviour only occurs in specific combinations due to the parsing done by jansi.
-        // For example test-test works fine, but test-test-test does not! In order to avoid this all together but
-        // still keep our versions the same as they were, we set the override property to the essentially garbage version
-        // BungeeCord. This version is only used when extracting the libraries to their temp folder.
         System.setProperty( "library.jansi.version", "BungeeCord" );
 
         AnsiConsole.systemInstall();
@@ -211,11 +204,6 @@ public class BungeeCord extends ProxyServer
         logger = new BungeeLogger( "BungeeCord", "proxy.log", consoleReader );
         JDK14LoggerFactory.LOGGER = logger;
 
-        // Before we can set the Err and Out streams to our LoggingOutputStream we also have to remove
-        // the default ConsoleHandler from the root logger, which writes to the err stream.
-        // But we still want to log these records, so we add our own handler which forwards the LogRecord to the BungeeLogger.
-        // This way we skip the err stream and the problem of only getting a string without context, and can handle the LogRecord itself.
-        // Thus improving the default bahavior for projects that log on other Logger instances not created by BungeeCord.
         Logger rootLogger = Logger.getLogger( "" );
         for ( Handler handler : rootLogger.getHandlers() )
         {
@@ -223,8 +211,6 @@ public class BungeeCord extends ProxyServer
         }
         rootLogger.addHandler( new LoggingForwardHandler( logger ) );
 
-        // We want everything that reaches these output streams to be handled by our logger
-        // since it applies a nice looking format and also writes to the logfile.
         System.setErr( new PrintStream( new LoggingOutputStream( logger, Level.SEVERE ), true ) );
         System.setOut( new PrintStream( new LoggingOutputStream( logger, Level.INFO ), true ) );
 
@@ -254,12 +240,6 @@ public class BungeeCord extends ProxyServer
         }
     }
 
-    /**
-     * Start this proxy instance by loading the configuration, plugins and
-     * starting the connect thread.
-     *
-     * @throws Exception any critical errors encountered
-     */
     @SuppressFBWarnings("RV_RETURN_VALUE_IGNORED_BAD_PRACTICE")
     public void start() throws Exception
     {
